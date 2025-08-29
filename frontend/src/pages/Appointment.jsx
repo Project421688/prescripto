@@ -31,57 +31,58 @@ const Appointment = () => {
         // getting current date
         let today = new Date()
 
-        for (let i = 0; i < 7; i++) {
+       for (let i = 0; i < 7; i++) {
 
-            // getting date with index 
-            let currentDate = new Date(today)
-            currentDate.setDate(today.getDate() + i)
+    let currentDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
 
-            // setting end time of the date with index
-            let endTime = new Date()
-            endTime.setDate(today.getDate() + i)
-            endTime.setHours(21, 0, 0, 0)
+    // end time = same date, but 9 PM
+    let endTime = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i, 21, 0, 0, 0);
 
-            // setting hours 
-            if (today.getDate() === currentDate.getDate()) {
-                currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
-                currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
-            } else {
-                currentDate.setHours(10)
-                currentDate.setMinutes(0)
-            }
+    console.log(currentDate,"cd",endTime,"et")
+    if (today.getDate() === currentDate.getDate() &&
+        today.getMonth() === currentDate.getMonth() &&
+        today.getFullYear() === currentDate.getFullYear()) {
+        currentDate.setHours(currentDate.getHours() > 10 ? currentDate.getHours() + 1 : 10)
+        currentDate.setMinutes(currentDate.getMinutes() > 30 ? 30 : 0)
+    } else {
+        currentDate.setHours(10)
+        currentDate.setMinutes(0)
+    }
+console.log("cd:cd:",currentDate)
+    let timeSlots = []
 
-            let timeSlots = [];
+    while (currentDate < endTime) {
+        let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        console.log("Ft",formattedTime)
 
+        let day = currentDate.getDate()
+        let month = currentDate.getMonth()+1
+        let year = currentDate.getFullYear()
 
-            while (currentDate < endTime) {
-                let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const slotDate = day + "_" + month + "_" + year
+        console.log("sldt",slotDate)
+        const slotTime = formattedTime
+        console.log("vc",slotTime)
 
-                let day = currentDate.getDate()
-                let month = currentDate.getMonth() + 1
-                let year = currentDate.getFullYear()
+        const isSlotAvailable =
+            docInfo.slots_booked[slotDate] &&
+            docInfo.slots_booked[slotDate].includes(slotTime)
+                ? false
+                : true
 
-                const slotDate = day + "_" + month + "_" + year
-                const slotTime = formattedTime
-
-                const isSlotAvailable = docInfo.slots_booked[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
-
-                if (isSlotAvailable) {
-
-                    // Add slot to array
-                    timeSlots.push({
-                        datetime: new Date(currentDate),
-                        time: formattedTime
-                    })
-                }
-
-                // Increment current time by 30 minutes
-                currentDate.setMinutes(currentDate.getMinutes() + 30);
-            }
-
-            setDocSlots(prev => ([...prev, timeSlots]))
-
+        if (isSlotAvailable) {
+            timeSlots.push({
+                datetime: new Date(currentDate),
+                time: formattedTime
+            })
         }
+
+        currentDate.setMinutes(currentDate.getMinutes() + 30)
+    }
+
+    setDocSlots(prev => ([...prev, timeSlots]))
+}
+
 
     }
 
@@ -95,10 +96,11 @@ const Appointment = () => {
         const date = docSlots[slotIndex][0].datetime
 
         let day = date.getDate()
-        let month = date.getMonth() + 1
+        let month = date.getMonth()+1
         let year = date.getFullYear()
 
         const slotDate = day + "_" + month + "_" + year
+        console.log("iuytfghjkl",slotDate)
 
         try {
 
